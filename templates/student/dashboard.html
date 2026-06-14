@@ -1,0 +1,357 @@
+{% extends "shared/base.html" %}
+{% block title %}Student Dashboard — AQG CBT Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+  body { background: #f0f4f8; }
+  .layout { display: grid; grid-template-columns: 230px 1fr; min-height: 100vh; }
+
+  .sidebar { background: #0d1f3c; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { padding: 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .logo-title { font-size: 15px; font-weight: 900; color: #e8a020; }
+  .logo-sub { font-size: 10px; color: rgba(255,255,255,.3); margin-top: 2px; letter-spacing: .5px; }
+  .user-info { padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: #e8a020; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #1a0a00; flex-shrink: 0; }
+  .user-name { font-size: 12px; font-weight: 700; color: rgba(255,255,255,.9); }
+  .user-role { font-size: 10px; color: rgba(255,255,255,.3); margin-top: 1px; }
+  nav { flex: 1; padding: 10px 0; }
+  .nav-item { width: 100%; text-align: left; padding: 10px 20px; border: none; background: transparent; border-left: 3px solid transparent; color: rgba(255,255,255,.45); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-family: inherit; transition: all .2s; }
+  .nav-item:hover { background: rgba(255,255,255,.04); color: rgba(255,255,255,.7); }
+  .nav-item.active { background: rgba(232,160,32,.1); border-left-color: #e8a020; color: #e8a020; font-weight: 700; }
+  .sidebar-bottom { padding: 16px; border-top: 1px solid rgba(255,255,255,.08); }
+  .logout-btn { width: 100%; padding: 8px; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; background: transparent; color: rgba(255,255,255,.3); font-size: 12px; cursor: pointer; font-family: inherit; text-align: left; }
+  .logout-btn:hover { color: rgba(255,255,255,.6); }
+
+  .main { padding: 28px 32px; overflow-y: auto; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .page-title { font-size: 20px; font-weight: 800; color: #0d1f3c; margin-bottom: 4px; font-family: 'Syne', sans-serif; }
+  .page-sub { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+  .stat { background: #fff; border-radius: 12px; padding: 18px; border: 1px solid #e2e8f0; }
+  .stat-val { font-size: 26px; font-weight: 900; color: #0d1f3c; font-family: 'Syne', sans-serif; }
+  .stat-label { font-size: 12px; color: #64748b; margin-top: 4px; font-weight: 600; }
+
+  .card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 18px; }
+  .card-title { font-size: 14px; font-weight: 700; color: #0d1f3c; margin-bottom: 14px; }
+
+  .btn { border: none; border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .2s; }
+  .btn-gold { background: #e8a020; color: #1a0a00; }
+  .btn-gold:hover { background: #f5c842; }
+  .btn-primary { background: #0d1f3c; color: #fff; }
+  .btn-ghost { background: transparent; color: #64748b; border: 1px solid #e2e8f0; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-yellow { background: #fef3c7; color: #92400e; }
+  .badge-blue { background: #dbeafe; color: #1d4ed8; }
+
+  .row-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; margin-bottom: 10px; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .row-card:last-child { margin-bottom: 0; }
+  .row-card.clickable { cursor: pointer; transition: all .15s; }
+  .row-card.clickable:hover { border-color: #0d1f3c; background: #fff; }
+  .course-code { font-size: 10px; font-weight: 700; color: #94a3b8; font-family: monospace; }
+  .course-name { font-size: 14px; font-weight: 700; color: #1e293b; margin: 2px 0; }
+  .meta-text { font-size: 11px; color: #94a3b8; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f8fafc; padding: 10px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-align: left; text-transform: uppercase; letter-spacing: .5px; border-bottom: 2px solid #e2e8f0; }
+  td { padding: 10px 12px; color: #1e293b; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+  .empty { text-align: center; padding: 3rem; color: #94a3b8; }
+  .empty-icon { font-size: 2.5rem; margin-bottom: .75rem; display: block; }
+
+  .profile-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+  .profile-row:last-child { border-bottom: none; }
+  .profile-label { color: #64748b; }
+  .profile-val { color: #1e293b; font-weight: 600; }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .stats { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-title">CBT Portal</div>
+      <div class="logo-sub">STUDENT</div>
+    </div>
+    <div class="user-info">
+      <div class="avatar">{{ user.full_name[0].upper() }}</div>
+      <div>
+        <div class="user-name">{{ user.full_name }}</div>
+        <div class="user-role">Student</div>
+      </div>
+    </div>
+    <nav>
+      <button class="nav-item active" id="nav-dashboard" onclick="showSection('dashboard', this)">&#9638; &nbsp;Dashboard</button>
+      <button class="nav-item" id="nav-browse" onclick="showSection('browse', this)">&#128269; &nbsp;Find a Course</button>
+      <button class="nav-item" id="nav-mycourses" onclick="showSection('mycourses', this)">&#127891; &nbsp;My Courses</button>
+      <button class="nav-item" id="nav-results" onclick="showSection('results', this)">&#128202; &nbsp;My Results</button>
+      <button class="nav-item" id="nav-profile" onclick="showSection('profile', this)">&#128100; &nbsp;Profile</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="{{ url_for('auth.logout') }}" class="logout-btn">&larr; Logout</a>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- Dashboard -->
+    <div class="section active" id="section-dashboard">
+      <div class="page-title">&#128075; Welcome, {{ user.full_name }}</div>
+      <div class="page-sub" id="today-date"></div>
+      <div class="stats">
+        <div class="stat"><div class="stat-val" id="stat-courses">0</div><div class="stat-label">Enrolled Courses</div></div>
+        <div class="stat"><div class="stat-val" style="color:#e8a020;" id="stat-available">0</div><div class="stat-label">Tests Available</div></div>
+        <div class="stat"><div class="stat-val" style="color:#059669;" id="stat-taken">0</div><div class="stat-label">Tests Taken</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Tests Available to Take</div>
+        <div id="availableTests"><div class="empty"><span class="empty-icon">&#128221;</span>No tests available right now.</div></div>
+      </div>
+    </div>
+
+    <!-- Find a Course -->
+    <div class="section" id="section-browse">
+      <div class="page-title">&#128269; Find a Course</div>
+      <div class="page-sub">Search for your course by code or name, then request to join.</div>
+      <div class="card">
+        <div style="display:flex; gap:10px; margin-bottom:16px;">
+          <input type="text" id="searchInput" placeholder="e.g. MAT 121 or Statistics"
+                 style="flex:1; padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:14px; font-family:inherit; outline:none;"
+                 onkeydown="if(event.key==='Enter') doSearch()">
+          <button class="btn btn-gold" onclick="doSearch()">Search</button>
+        </div>
+        <div id="searchResults"><div class="empty"><span class="empty-icon">&#128269;</span>Type a course code or name and press Search.</div></div>
+      </div>
+    </div>
+
+    <!-- My Courses -->
+    <div class="section" id="section-mycourses">
+      <div class="page-title">&#127891; My Courses</div>
+      <div class="page-sub">Click an enrolled course to see its tests</div>
+      <div class="card"><div id="myCoursesList"><div class="empty"><span class="empty-icon">&#127891;</span>You have not joined any course yet.</div></div></div>
+    </div>
+
+    <!-- Course Tests (sub-view inside My Courses) -->
+    <div class="section" id="section-coursetests">
+      <button class="btn btn-ghost btn-sm" onclick="showSection('mycourses', document.getElementById('nav-mycourses'))" style="margin-bottom:14px;">&larr; Back to My Courses</button>
+      <div class="page-title" id="coursetests-title">Tests</div>
+      <div class="page-sub" id="coursetests-sub"></div>
+      <div class="card">
+        <div class="card-title">Available Tests</div>
+        <div id="courseTestsList"><div class="empty"><span class="empty-icon">&#128221;</span>No tests available yet.</div></div>
+      </div>
+    </div>
+
+    <!-- My Results -->
+    <div class="section" id="section-results">
+      <div class="page-title">&#128202; My Results</div>
+      <div class="page-sub">Your past test scores</div>
+      <div class="card"><div id="resultsList"><div class="empty"><span class="empty-icon">&#128202;</span>No results yet.</div></div></div>
+    </div>
+
+    <!-- Profile -->
+    <div class="section" id="section-profile">
+      <div class="page-title">&#128100; Profile</div>
+      <div class="page-sub">Your account details</div>
+      <div class="card">
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
+          <div class="avatar" style="width:52px; height:52px; font-size:20px;">{{ user.full_name[0].upper() }}</div>
+          <div>
+            <div style="font-size:16px; font-weight:700; color:#0d1f3c;">{{ user.full_name }}</div>
+            <div style="font-size:12px; color:#64748b;">Student</div>
+          </div>
+        </div>
+        <div class="profile-row"><span class="profile-label">Full Name</span><span class="profile-val">{{ user.full_name }}</span></div>
+        <div class="profile-row"><span class="profile-label">Matric Number</span><span class="profile-val">{{ user.matric_no or 'N/A' }}</span></div>
+        <div class="profile-row"><span class="profile-label">Email</span><span class="profile-val">{{ user.email }}</span></div>
+        <div class="profile-row"><span class="profile-label">Enrolled Courses</span><span class="profile-val" id="profileCourses">—</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function showSection(name, el) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    if (el) el.classList.add('active');
+    if (name === 'dashboard') loadDashboard();
+    if (name === 'browse') { /* search-driven */ }
+    if (name === 'mycourses') loadMyCourses();
+    if (name === 'results') loadResults();
+    if (name === 'profile') loadMyCourses();
+  }
+
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  // ── Dashboard ──
+  function loadDashboard() {
+    fetch('/student/my-courses')
+    .then(r => r.json())
+    .then(data => {
+      const enrolled = (data.courses || []).filter(c => c.status === 'enrolled');
+      document.getElementById('stat-courses').textContent = enrolled.length;
+    });
+
+    fetch('/student/my-results')
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('stat-taken').textContent = (data.results || []).length;
+    });
+
+    fetch('/student/available-tests')
+    .then(r => r.json())
+    .then(data => {
+      const tests = data.tests || [];
+      document.getElementById('stat-available').textContent = tests.length;
+      const c = document.getElementById('availableTests');
+      if (tests.length === 0) { c.innerHTML = '<div class="empty"><span class="empty-icon">&#128221;</span>No tests available right now.</div>'; return; }
+      c.innerHTML = tests.map(t => `
+        <div class="row-card">
+          <div>
+            <div class="course-name">${t.title}</div>
+            <div class="meta-text">${t.course_code} &middot; ${t.category || 'test'} &middot; ${t.time_limit} mins &middot; ${t.question_count} questions</div>
+          </div>
+          <a href="/student/test/${t.id}" class="btn btn-gold btn-sm">Take Test</a>
+        </div>`).join('');
+    });
+  }
+
+  // ── Find a Course ──
+  function doSearch() {
+    const q = document.getElementById('searchInput').value.trim();
+    const c = document.getElementById('searchResults');
+    if (!q) { c.innerHTML = '<div class="empty"><span class="empty-icon">&#128269;</span>Type a course code or name and press Search.</div>'; return; }
+    fetch('/student/search-courses?q=' + encodeURIComponent(q))
+    .then(r => r.json())
+    .then(data => {
+      const courses = data.courses || [];
+      if (courses.length === 0) { c.innerHTML = '<div class="empty"><span class="empty-icon">&#128683;</span>No available course found matching "' + q + '".</div>'; return; }
+      c.innerHTML = courses.map(course => {
+        let action = '';
+        if (course.enrollment_status === 'enrolled') action = '<span class="badge badge-green">Enrolled</span>';
+        else if (course.enrollment_status === 'pending') action = '<span class="badge badge-yellow">Pending approval</span>';
+        else action = `<button class="btn btn-gold btn-sm" onclick="requestJoin(${course.id})">Request to Join</button>`;
+        return `
+          <div class="row-card">
+            <div>
+              <div class="course-code">${course.code}</div>
+              <div class="course-name">${course.title}</div>
+              <div class="meta-text">${course.lecturer} &middot; ${course.domain}</div>
+            </div>
+            <div>${action}</div>
+          </div>`;
+      }).join('');
+    });
+  }
+
+  function requestJoin(courseId) {
+    fetch(`/student/enroll/${courseId}`, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token() }}' } })
+    .then(r => r.json())
+    .then(data => { alert(data.message); doSearch(); loadMyCourses(); });
+  }
+
+  // ── My Courses ──
+  function loadMyCourses() {
+    fetch('/student/my-courses')
+    .then(r => r.json())
+    .then(data => {
+      const courses = data.courses || [];
+      const enrolledNames = courses.filter(c => c.status === 'enrolled').map(c => c.code);
+      const pc = document.getElementById('profileCourses');
+      if (pc) pc.textContent = enrolledNames.length ? enrolledNames.join(', ') : 'None';
+
+      const c = document.getElementById('myCoursesList');
+      if (!c) return;
+      if (courses.length === 0) { c.innerHTML = '<div class="empty"><span class="empty-icon">&#127891;</span>You have not joined any course yet.</div>'; return; }
+      c.innerHTML = courses.map(course => {
+        const isEnrolled = course.status === 'enrolled';
+        return `
+          <div class="row-card ${isEnrolled ? 'clickable' : ''}" ${isEnrolled ? `onclick="openCourseTests(${course.id}, '${course.code}', '${course.title.replace(/'/g, "\\'")}')"` : ''}>
+            <div>
+              <div class="course-code">${course.code}</div>
+              <div class="course-name">${course.title}</div>
+              <div class="meta-text">${course.lecturer} &middot; ${course.domain}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="badge ${isEnrolled ? 'badge-green' : 'badge-yellow'}">${isEnrolled ? 'Enrolled' : 'Pending'}</span>
+              ${isEnrolled ? '<span style="font-size:12px; color:#94a3b8;">Click to view tests &rarr;</span>' : ''}
+            </div>
+          </div>`;
+      }).join('');
+    });
+  }
+
+  // ── Course Tests (click course → see its tests) ──
+  function openCourseTests(courseId, courseCode, courseTitle) {
+    document.getElementById('coursetests-title').textContent = courseCode + ' — ' + courseTitle;
+    document.getElementById('coursetests-sub').textContent = 'Published tests available for you to take';
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('section-coursetests').classList.add('active');
+    // highlight My Courses nav
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('nav-mycourses').classList.add('active');
+
+    fetch('/student/available-tests')
+    .then(r => r.json())
+    .then(data => {
+      const tests = (data.tests || []).filter(t => t.course_code === courseCode);
+      const c = document.getElementById('courseTestsList');
+      if (tests.length === 0) {
+        c.innerHTML = '<div class="empty"><span class="empty-icon">&#128221;</span>No tests available in this course yet.</div>';
+        return;
+      }
+      c.innerHTML = tests.map(t => `
+        <div class="row-card">
+          <div>
+            <div class="course-name">${t.title}</div>
+            <div class="meta-text">${t.category || 'test'} &middot; ${t.time_limit} mins &middot; ${t.question_count} questions</div>
+          </div>
+          <a href="/student/test/${t.id}" class="btn btn-gold btn-sm">Take Test</a>
+        </div>`).join('');
+    });
+  }
+
+  // ── Results ──
+  function loadResults() {
+    fetch('/student/my-results')
+    .then(r => r.json())
+    .then(data => {
+      const results = data.results || [];
+      const c = document.getElementById('resultsList');
+      if (results.length === 0) { c.innerHTML = '<div class="empty"><span class="empty-icon">&#128202;</span>No results yet.</div>'; return; }
+      c.innerHTML = `
+        <div class="table-wrap"><table>
+          <thead><tr><th>Test</th><th>Course</th><th>Score</th><th>%</th><th>Grade</th><th>Date</th></tr></thead>
+          <tbody>${results.map(r => `
+            <tr>
+              <td style="font-weight:600;">${r.test}</td>
+              <td style="font-family:monospace;">${r.course}</td>
+              <td>${r.score}/${r.total}</td>
+              <td>${r.percentage}%</td>
+              <td><span class="badge ${r.grade === 'F' ? 'badge-yellow' : 'badge-green'}">${r.grade}</span></td>
+              <td style="color:#94a3b8;">${r.submitted_at}</td>
+            </tr>`).join('')}
+          </tbody></table></div>`;
+    });
+  }
+
+  loadDashboard();
+</script>
+{% endblock %}

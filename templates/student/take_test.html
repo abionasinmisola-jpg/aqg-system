@@ -1,0 +1,251 @@
+{% extends "shared/base.html" %}
+{% block title %}Take Test — AQG CBT Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+  body { background: #f0f4f8; }
+  .test-wrap { max-width: 800px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  .test-head { background: #0d1f3c; border-radius: 14px; padding: 20px 24px; color: #fff; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; position: sticky; top: 12px; z-index: 50; }
+  .test-head h1 { font-size: 18px; font-weight: 800; font-family: 'Syne', sans-serif; margin: 0; }
+  .test-head .meta { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 3px; }
+  .timer { background: rgba(232,160,32,.15); border: 1px solid rgba(232,160,32,.4); color: #f5c842; border-radius: 10px; padding: 8px 16px; font-size: 18px; font-weight: 800; font-family: monospace; }
+  .timer.warning { background: rgba(220,38,38,.2); border-color: rgba(220,38,38,.5); color: #fca5a5; }
+
+  .q-block { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 22px; margin-bottom: 16px; }
+  .q-num { font-size: 11px; font-weight: 700; color: #e8a020; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .q-text { font-size: 15px; font-weight: 600; color: #1e293b; line-height: 1.55; margin-bottom: 16px; }
+
+  .opt { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: all .15s; }
+  .opt:hover { border-color: #0d1f3c; background: #f8fafc; }
+  .opt.selected { border-color: #e8a020; background: #fffbf0; }
+  .opt input { accent-color: #0d1f3c; width: 16px; height: 16px; }
+  .opt-letter { font-weight: 700; color: #64748b; }
+  .opt-text { font-size: 14px; color: #1e293b; }
+
+  .fill-input { width: 100%; padding: 12px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-family: inherit; outline: none; box-sizing: border-box; }
+  .fill-input:focus { border-color: #e8a020; background: #fffbf0; }
+  .fill-hint { font-size: 11px; color: #94a3b8; margin-top: 6px; }
+
+  .submit-bar { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #e2e8f0; padding: 16px; display: flex; justify-content: space-between; align-items: center; border-radius: 12px; margin-top: 20px; box-shadow: 0 -4px 20px rgba(0,0,0,.05); }
+  .progress-text { font-size: 13px; color: #64748b; font-weight: 600; }
+  .btn-submit { background: #e8a020; color: #1a0a00; border: none; border-radius: 10px; padding: 12px 28px; font-size: 15px; font-weight: 800; cursor: pointer; font-family: inherit; }
+  .btn-submit:hover { background: #f5c842; }
+  .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+  .center-msg { text-align: center; padding: 4rem 2rem; }
+  .center-msg .icon { font-size: 3rem; margin-bottom: 1rem; }
+  .center-msg h2 { font-size: 20px; color: #0d1f3c; margin-bottom: 8px; }
+  .center-msg p { font-size: 14px; color: #64748b; }
+
+  /* Result screen */
+  .result-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 40px; text-align: center; max-width: 480px; margin: 40px auto; }
+  .grade-circle { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: 900; font-family: 'Syne', sans-serif; margin: 0 auto 20px; }
+  .grade-A, .grade-B { background: #d1fae5; color: #065f46; }
+  .grade-C, .grade-D { background: #fef3c7; color: #92400e; }
+  .grade-F { background: #fee2e2; color: #991b1b; }
+  .result-score { font-size: 16px; color: #64748b; margin-bottom: 6px; }
+  .result-pct { font-size: 40px; font-weight: 900; color: #0d1f3c; font-family: 'Syne', sans-serif; margin-bottom: 24px; }
+  .btn-home { background: #0d1f3c; color: #fff; border: none; border-radius: 10px; padding: 12px 28px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; text-decoration: none; display: inline-block; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="test-wrap">
+  <div id="loadingView" class="center-msg">
+    <div class="icon">&#8987;</div>
+    <h2>Loading test...</h2>
+  </div>
+
+  <div id="errorView" class="center-msg" style="display:none;">
+    <div class="icon">&#9888;&#65039;</div>
+    <h2>Cannot open test</h2>
+    <p id="errorMsg"></p>
+    <a href="/student/dashboard" class="btn-home" style="margin-top:20px;">Back to Dashboard</a>
+  </div>
+
+  <div id="testView" style="display:none;">
+    <div class="test-head">
+      <div>
+        <h1 id="testTitle">Test</h1>
+        <div class="meta" id="testMeta"></div>
+      </div>
+      <div class="timer" id="timer">--:--</div>
+    </div>
+    <div id="questionsContainer"></div>
+    <div class="submit-bar">
+      <div class="progress-text" id="progressText">0 of 0 answered</div>
+      <button class="btn-submit" id="submitBtn" onclick="submitTest()">Submit Test</button>
+    </div>
+  </div>
+
+  <div id="resultView" style="display:none;">
+    <div class="result-card">
+      <div class="grade-circle" id="gradeCircle">-</div>
+      <div class="result-score" id="resultScore"></div>
+      <div class="result-pct" id="resultPct"></div>
+      <a href="/student/dashboard" class="btn-home">Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const TEST_ID = {{ test_id }};
+  let questions = [];
+  let answers = {};
+  let timeLeft = 0;
+  let timerInterval = null;
+  let submitted = false;
+
+  // Load the test
+  fetch(`/student/take-test/${TEST_ID}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.success === false) {
+        document.getElementById('loadingView').style.display = 'none';
+        document.getElementById('errorView').style.display = 'block';
+        document.getElementById('errorMsg').textContent = data.message || 'Something went wrong.';
+        return;
+      }
+      questions = data.questions || [];
+      document.getElementById('loadingView').style.display = 'none';
+      document.getElementById('testView').style.display = 'block';
+      document.getElementById('testTitle').textContent = data.test.title;
+      document.getElementById('testMeta').textContent =
+        `${data.test.course} · ${data.test.category || 'test'} · ${questions.length} questions`;
+      renderQuestions();
+      startTimer(data.test.time_limit);
+    })
+    .catch(() => {
+      document.getElementById('loadingView').style.display = 'none';
+      document.getElementById('errorView').style.display = 'block';
+      document.getElementById('errorMsg').textContent = 'Could not load the test. Please try again.';
+    });
+
+  function renderQuestions() {
+    const c = document.getElementById('questionsContainer');
+    c.innerHTML = questions.map((q, i) => {
+      let body = '';
+      if (q.type === 'mcq') {
+        body = Object.entries(q.options).map(([k, v]) => `
+          <label class="opt" id="opt-${q.id}-${k}" onclick="selectMcq(${q.id}, '${k}')">
+            <input type="radio" name="q-${q.id}" value="${k}">
+            <span class="opt-letter">${k}.</span>
+            <span class="opt-text">${v || ''}</span>
+          </label>`).join('');
+      } else {
+        body = `
+          <input type="text" class="fill-input" id="fill-${q.id}"
+                 placeholder="Type your answer..."
+                 oninput="setFill(${q.id}, this.value)">
+          <div class="fill-hint">Type your answer in lowercase.</div>`;
+      }
+      return `
+        <div class="q-block">
+          <div class="q-num">Question ${i + 1}</div>
+          <div class="q-text">${q.question}</div>
+          ${body}
+        </div>`;
+    }).join('');
+    updateProgress();
+  }
+
+  function selectMcq(qid, letter) {
+    answers[qid] = letter;
+    questions.forEach(q => {
+      if (q.id === qid && q.type === 'mcq') {
+        Object.keys(q.options).forEach(k => {
+          const el = document.getElementById(`opt-${qid}-${k}`);
+          if (el) el.classList.toggle('selected', k === letter);
+        });
+      }
+    });
+    updateProgress();
+  }
+
+  function setFill(qid, val) {
+    if (val.trim()) answers[qid] = val;
+    else delete answers[qid];
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const answered = Object.keys(answers).length;
+    document.getElementById('progressText').textContent = `${answered} of ${questions.length} answered`;
+  }
+
+  function startTimer(minutes) {
+    timeLeft = minutes * 60;
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateTimerDisplay();
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        alert('Time is up! Your test will be submitted automatically.');
+        submitTest();
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay() {
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const t = document.getElementById('timer');
+    t.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    if (timeLeft <= 60) t.classList.add('warning');
+  }
+
+  function submitTest() {
+    if (submitted) return;
+    const answered = Object.keys(answers).length;
+    if (timeLeft > 0 && answered < questions.length) {
+      if (!confirm(`You have answered ${answered} of ${questions.length}. Submit anyway?`)) return;
+    }
+    submitted = true;
+    clearInterval(timerInterval);
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').textContent = 'Submitting...';
+
+    fetch(`/student/submit-test/${TEST_ID}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+      body: JSON.stringify({ answers })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showResult(data);
+      } else {
+        alert(data.message || 'Submission failed.');
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('submitBtn').textContent = 'Submit Test';
+        submitted = false;
+      }
+    })
+    .catch(() => {
+      alert('Submission failed. Please try again.');
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('submitBtn').textContent = 'Submit Test';
+      submitted = false;
+    });
+  }
+
+  function showResult(data) {
+    document.getElementById('testView').style.display = 'none';
+    document.getElementById('resultView').style.display = 'block';
+    const gc = document.getElementById('gradeCircle');
+    gc.textContent = data.grade;
+    gc.className = 'grade-circle grade-' + data.grade;
+    document.getElementById('resultScore').textContent = `You scored ${data.score} out of ${data.total}`;
+    document.getElementById('resultPct').textContent = data.percentage + '%';
+  }
+
+  // Warn before leaving mid-test
+  window.addEventListener('beforeunload', (e) => {
+    if (!submitted && questions.length > 0) { e.preventDefault(); e.returnValue = ''; }
+  });
+</script>
+{% endblock %}

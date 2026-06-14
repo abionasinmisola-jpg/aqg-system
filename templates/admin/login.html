@@ -1,0 +1,115 @@
+{% extends "shared/base.html" %}
+{% block title %}Admin Login — AQG System{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-wrap {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem;
+    background: radial-gradient(ellipse at 50% 30%, rgba(167,139,250,.1) 0%, transparent 60%);
+  }
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid rgba(167,139,250,.2);
+    border-radius: var(--radius);
+    padding: 2.5rem;
+    width: 100%; max-width: 420px;
+    box-shadow: 0 24px 60px rgba(0,0,0,.5);
+  }
+  .auth-header { text-align: center; margin-bottom: 2rem; }
+  .auth-logo {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--accent2), #7c3aed);
+    border-radius: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-bottom: 1rem;
+    box-shadow: 0 0 30px rgba(167,139,250,.3);
+  }
+  .auth-header h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: .3rem; }
+  .auth-header p { color: var(--muted); font-size: 14px; }
+  .form-label { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: .4rem; }
+  .form-control {
+    background: var(--surface2); border: 1.5px solid var(--border);
+    color: var(--text); border-radius: 10px;
+    padding: .65rem 1rem; font-size: 14px; transition: border-color .2s;
+  }
+  .form-control:focus {
+    background: var(--surface2); border-color: var(--accent2);
+    box-shadow: 0 0 0 3px rgba(167,139,250,.15); color: var(--text);
+  }
+  .form-control::placeholder { color: var(--muted); }
+  .btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent2), #7c3aed);
+    color: #fff; border: none; border-radius: 10px; padding: .75rem;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px;
+    cursor: pointer; transition: opacity .2s, transform .15s; margin-top: .5rem;
+  }
+  .btn-submit:hover { opacity: .9; transform: translateY(-1px); }
+  .field-error { color: var(--danger); font-size: 12px; margin-top: .3rem; }
+  .admin-badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(167,139,250,.1);
+    border: 1px solid rgba(167,139,250,.3);
+    color: var(--accent2);
+    border-radius: 50px; padding: .3rem .9rem;
+    font-size: 12px; margin-bottom: 1rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo">⚙️</div>
+      <div class="admin-badge">
+        <i class="bi bi-shield-fill"></i> Super Admin Access
+      </div>
+      <h2>Admin Portal</h2>
+      <p>Restricted access — authorized personnel only</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin.login') }}" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="mb-3">
+        {{ form.email.label(class="form-label") }}
+        {{ form.email(class="form-control", placeholder="admin@aqgsystem.com") }}
+        {% for err in form.email.errors %}
+          <div class="field-error"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="mb-3">
+        {{ form.password.label(class="form-label") }}
+        <div style="position:relative;">
+          {{ form.password(class="form-control", placeholder="••••••••", id="pwd") }}
+          <button type="button" onclick="togglePwd()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;">
+            <i class="bi bi-eye" id="eyeIcon"></i>
+          </button>
+        </div>
+        {% for err in form.password.errors %}
+          <div class="field-error"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="btn-submit">
+        <i class="bi bi-shield-lock me-2"></i>Access Admin Panel
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function togglePwd() {
+    const f = document.getElementById('pwd');
+    const i = document.getElementById('eyeIcon');
+    if (f.type === 'password') { f.type = 'text'; i.className = 'bi bi-eye-slash'; }
+    else { f.type = 'password'; i.className = 'bi bi-eye'; }
+  }
+</script>
+{% endblock %}

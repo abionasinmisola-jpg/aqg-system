@@ -1,0 +1,76 @@
+{
+  "mathematics": {
+    "queries": [
+      {
+        "query": "What is the definition of a prime number?",
+        "retrieved": 4,
+        "relevant": 1,
+        "accuracy": 25.0
+      },
+      {
+        "query": "How do you calculate the area of a circle?",
+        "retrieved": 4,
+        "relevant": 1,
+        "accuracy": 25.0
+      },
+      {
+        "query": "What is the Pythagorean theorem?",
+        "retrieved": 4,
+        "relevant": 1,
+        "accuracy": 25.0
+      },
+      {
+        "query": "Define a quadratic equation",
+        "retrieved": 4,
+        "relevant": 1,
+        "accuracy": 25.0
+      },
+      {
+        "query": "What is the mean of a dataset?",
+        "retrieved": 4,
+        "relevant": 1,
+        "accuracy": 25.0
+      }
+    ],
+    "overall_accuracy": 25.0,
+    "avg_retrieval_time_ms": 166.56
+  },
+  "programming": {
+    "queries": [
+      {
+        "query": "What is a recursive function?",
+        "retrieved": 5,
+        "relevant": 5,
+        "accuracy": 100.0
+      },
+      {
+        "query": "How does a for loop work in programming?",
+        "retrieved": 5,
+        "relevant": 3,
+        "accuracy": 60.0
+      },
+      {
+        "query": "What is the difference between a list and a tuple?",
+        "retrieved": 5,
+        "relevant": 5,
+        "accuracy": 100.0
+      },
+      {
+        "query": "Define object oriented programming",
+        "retrieved": 5,
+        "relevant": 1,
+        "accuracy": 20.0
+      },
+      {
+        "query": "What is time complexity of an algorithm?",
+        "retrieved": 5,
+        "relevant": 5,
+        "accuracy": 100.0
+      }
+    ],
+    "overall_accuracy": 76.0,
+    "avg_retrieval_time_ms": 39.03
+  },
+  "overall_accuracy": 50.5,
+  "avg_retrieval_time_ms": 102.8
+}

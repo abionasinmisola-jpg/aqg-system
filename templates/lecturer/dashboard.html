@@ -1,0 +1,858 @@
+{% extends "shared/base.html" %}
+{% block title %}Lecturer Dashboard — AQG System{% endblock %}
+
+{% block extra_css %}
+<style>
+  body { background: #f0f4f8; }
+  .layout { display: grid; grid-template-columns: 230px 1fr; min-height: 100vh; }
+
+  .sidebar { background: #0d1f3c; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { padding: 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .logo-title { font-size: 15px; font-weight: 900; color: #e8a020; }
+  .logo-sub { font-size: 10px; color: rgba(255,255,255,.3); margin-top: 2px; letter-spacing: .5px; }
+  .user-info { padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: #e8a020; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #1a0a00; flex-shrink: 0; }
+  .user-name { font-size: 12px; font-weight: 700; color: rgba(255,255,255,.9); }
+  .user-role { font-size: 10px; color: rgba(255,255,255,.3); margin-top: 1px; }
+  nav { flex: 1; padding: 10px 0; }
+  .nav-item { width: 100%; text-align: left; padding: 10px 20px; border: none; background: transparent; border-left: 3px solid transparent; color: rgba(255,255,255,.45); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-family: inherit; transition: all .2s; }
+  .nav-item:hover { background: rgba(255,255,255,.04); color: rgba(255,255,255,.7); }
+  .nav-item.active { background: rgba(232,160,32,.1); border-left-color: #e8a020; color: #e8a020; font-weight: 700; }
+  .sidebar-bottom { padding: 16px; border-top: 1px solid rgba(255,255,255,.08); }
+  .logout-btn { width: 100%; padding: 8px; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; background: transparent; color: rgba(255,255,255,.3); font-size: 12px; cursor: pointer; font-family: inherit; text-align: left; }
+  .logout-btn:hover { color: rgba(255,255,255,.6); }
+
+  .main { padding: 28px 32px; overflow-y: auto; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .page-title { font-size: 20px; font-weight: 800; color: #0d1f3c; margin-bottom: 4px; font-family: 'Syne', sans-serif; }
+  .page-sub { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  .stat { background: #fff; border-radius: 12px; padding: 18px; border: 1px solid #e2e8f0; }
+  .stat-val { font-size: 26px; font-weight: 900; color: #0d1f3c; font-family: 'Syne', sans-serif; }
+  .stat-label { font-size: 12px; color: #64748b; margin-top: 4px; font-weight: 600; }
+  .stat-sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  .card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+  .card-title { font-size: 14px; font-weight: 700; color: #0d1f3c; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+
+  .btn { border: none; border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .2s; }
+  .btn-primary { background: #0d1f3c; color: #fff; }
+  .btn-primary:hover { background: #1a3563; }
+  .btn-gold { background: #e8a020; color: #1a0a00; }
+  .btn-gold:hover { background: #f5c842; }
+  .btn-ghost { background: transparent; color: #64748b; border: 1px solid #e2e8f0; }
+  .btn-ghost:hover { background: #f8fafc; }
+  .btn-danger { background: #fee2e2; color: #991b1b; }
+  .btn-success { background: #d1fae5; color: #065f46; }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+  .badge-blue { background: #dbeafe; color: #1d4ed8; }
+  .badge-yellow { background: #fef3c7; color: #92400e; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+
+  .course-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; margin-bottom: 10px; background: #f8fafc; cursor: pointer; transition: all .15s; }
+  .course-card:hover { border-color: #0d1f3c; background: #fff; }
+  .course-card:last-child { margin-bottom: 0; }
+  .course-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .course-code { font-size: 10px; font-weight: 700; color: #94a3b8; font-family: monospace; }
+  .course-name { font-size: 14px; font-weight: 700; color: #1e293b; margin: 3px 0 8px; }
+  .course-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .meta-text { font-size: 11px; color: #94a3b8; }
+  .toggle-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .toggle { width: 40px; height: 22px; border-radius: 11px; border: none; cursor: pointer; position: relative; transition: background .2s; flex-shrink: 0; }
+  .toggle.on { background: #059669; }
+  .toggle.off { background: #e2e8f0; }
+  .toggle-label { font-size: 10px; font-weight: 600; }
+  .toggle.on + .toggle-label { color: #059669; }
+  .toggle.off + .toggle-label { color: #94a3b8; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .5px; }
+  .form-control { width: 100%; padding: 9px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; background: #f8fafc; color: #1e293b; box-sizing: border-box; transition: border-color .2s; }
+  .form-control:focus { border-color: #0d1f3c; background: #fff; }
+  .form-select { appearance: none; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .create-form { background: #fffbf0; border: 1px solid #fde68a; border-radius: 12px; padding: 20px; margin-bottom: 18px; display: none; }
+  .create-form.show { display: block; }
+
+  .upload-zone { border: 2px dashed #e2e8f0; border-radius: 12px; padding: 1.4rem; text-align: center; cursor: pointer; transition: all .2s; background: #f8fafc; margin-bottom: 1rem; }
+  .upload-zone:hover { border-color: #0d1f3c; background: #f0f4f8; }
+
+  .progress-wrap { display: none; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+  .progress-bar-bg { background: #f1f5f9; border-radius: 50px; height: 6px; overflow: hidden; margin-top: 6px; }
+  .progress-bar { height: 100%; border-radius: 50px; background: linear-gradient(90deg, #0d1f3c, #e8a020); width: 0%; transition: width .3s; }
+
+  .q-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 12px; background: #f8fafc; }
+  .q-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; gap: 6px; }
+  .q-text { font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 10px; line-height: 1.5; }
+  .q-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .q-opt { padding: 6px 10px; border-radius: 6px; font-size: 12px; background: #fff; border: 1px solid #e2e8f0; color: #1e293b; }
+  .q-opt.correct { background: #d1fae5; border-color: #a7f3d0; color: #065f46; font-weight: 700; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f8fafc; padding: 10px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-align: left; text-transform: uppercase; letter-spacing: .5px; border-bottom: 2px solid #e2e8f0; }
+  td { padding: 10px 12px; color: #1e293b; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+  tr:hover td { background: #f8fafc; }
+
+  .empty { text-align: center; padding: 3rem; color: #94a3b8; }
+  .empty-icon { font-size: 2.5rem; margin-bottom: .75rem; display: block; }
+
+  .ws-tabs { display: flex; gap: 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px; }
+  .ws-tab { padding: 10px 18px; font-size: 13px; font-weight: 700; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; background: none; border-top: none; border-left: none; border-right: none; font-family: inherit; }
+  .ws-tab.active { color: #0d1f3c; border-bottom-color: #e8a020; }
+  .ws-pane { display: none; }
+  .ws-pane.active { display: block; }
+  .test-select { border: 2px solid #e8a020 !important; }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .grid2 { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-title">AQG System</div>
+      <div class="logo-sub">LECTURER PORTAL</div>
+    </div>
+    <div class="user-info">
+      <div class="avatar">{{ user.full_name[0].upper() }}</div>
+      <div>
+        <div class="user-name">{{ user.full_name }}</div>
+        <div class="user-role">Lecturer</div>
+      </div>
+    </div>
+    <nav>
+      <button class="nav-item active" id="nav-dashboard" onclick="showSection('dashboard', this)">&#9638; &nbsp;Dashboard</button>
+      <button class="nav-item" id="nav-courses" onclick="showSection('courses', this)">&#128218; &nbsp;My Courses</button>
+      <button class="nav-item" id="nav-qbank" onclick="showSection('qbank', this)">&#128196; &nbsp;Question Bank</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="{{ url_for('lecturer.logout') }}" class="logout-btn">&larr; Logout</a>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="section active" id="section-dashboard">
+      <div class="page-title">&#128075; Welcome, {{ user.full_name }}</div>
+      <div class="page-sub" id="today-date"></div>
+      <div class="stats">
+        <div class="stat"><div class="stat-val" id="stat-courses">0</div><div class="stat-label">My Courses</div></div>
+        <div class="stat"><div class="stat-val" style="color:#2563eb;" id="stat-students">0</div><div class="stat-label">Total Students</div><div class="stat-sub">Across all courses</div></div>
+        <div class="stat"><div class="stat-val" style="color:#059669;" id="stat-questions">0</div><div class="stat-label">Questions Generated</div></div>
+        <div class="stat"><div class="stat-val" style="color:#e8a020;" id="stat-tests">0</div><div class="stat-label">Published Tests</div></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">&#128218; My Courses</div>
+          <div id="dashboard-courses"><div class="empty"><span class="empty-icon">&#128218;</span>No courses yet</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">&#9889; Quick Actions</div>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <button onclick="showSection('courses', document.getElementById('nav-courses'))" class="btn btn-primary" style="width:100%; text-align:left; padding:12px 16px;">&#128218; Go to My Courses</button>
+            <div style="font-size:12px; color:#94a3b8; padding:8px 4px;">Click a course to upload notes, create tests, and generate questions inside it.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="section-courses">
+      <div class="page-title">&#128218; My Courses</div>
+      <div class="page-sub">Click a course to open its workspace &mdash; tests and students live inside it</div>
+      <div style="display:flex; justify-content:flex-end; margin-bottom:14px;">
+        <button class="btn btn-gold" onclick="toggleCreateForm()">+ Create Course</button>
+      </div>
+      <div class="create-form" id="createForm">
+        <div style="font-size:14px; font-weight:700; color:#0d1f3c; margin-bottom:14px;">Create New Course</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">Course Code</label><input class="form-control" id="courseCode" placeholder="e.g. CSC301"></div>
+          <div class="form-group"><label class="form-label">Course Title</label><input class="form-control" id="courseTitle" placeholder="e.g. Data Structures"></div>
+          <div class="form-group"><label class="form-label">Domain</label>
+            <select class="form-control form-select" id="courseDomain"><option value="programming">Programming</option><option value="mathematics">Mathematics</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">Description (optional)</label><input class="form-control" id="courseDesc" placeholder="Brief description"></div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:6px;">
+          <button class="btn btn-gold" onclick="createCourse()">Create Course</button>
+          <button class="btn btn-ghost" onclick="toggleCreateForm()">Cancel</button>
+        </div>
+      </div>
+      <div id="coursesList"><div class="empty"><span class="empty-icon">&#128218;</span>No courses yet. Create your first course!</div></div>
+    </div>
+
+    <div class="section" id="section-qbank">
+      <div class="page-title">&#128196; Question Bank</div>
+      <div class="page-sub">All questions generated across your courses</div>
+
+      <div class="stats" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stat"><div class="stat-val" id="qb-total">0</div><div class="stat-label">Total Questions</div></div>
+        <div class="stat"><div class="stat-val" style="color:#059669;" id="qb-verified">0</div><div class="stat-label">Verified</div></div>
+        <div class="stat"><div class="stat-val" style="color:#f59e0b;" id="qb-warning">0</div><div class="stat-label">Warning</div></div>
+        <div class="stat"><div class="stat-val" style="color:#dc2626;" id="qb-failed">0</div><div class="stat-label">Failed</div></div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+          <select class="form-control form-select" id="qb-domain" onchange="loadQBank(1)" style="width:auto;">
+            <option value="">All Domains</option>
+            <option value="mathematics">Mathematics</option>
+            <option value="programming">Programming</option>
+          </select>
+          <select class="form-control form-select" id="qb-bloom" onchange="loadQBank(1)" style="width:auto;">
+            <option value="">All Bloom Levels</option>
+            <option value="remember">Remember</option>
+            <option value="understand">Understand</option>
+            <option value="apply">Apply</option>
+            <option value="analyse">Analyse</option>
+            <option value="evaluate">Evaluate</option>
+            <option value="create">Create</option>
+          </select>
+          <select class="form-control form-select" id="qb-type" onchange="loadQBank(1)" style="width:auto;">
+            <option value="">All Types</option>
+            <option value="mcq">MCQ</option>
+            <option value="fill">Fill-in-the-blank</option>
+          </select>
+          <select class="form-control form-select" id="qb-status" onchange="loadQBank(1)" style="width:auto;">
+            <option value="">All Statuses</option>
+            <option value="verified">Verified</option>
+            <option value="warning">Warning</option>
+            <option value="failed">Failed</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:35%;">Question</th>
+                <th>Course</th>
+                <th>Domain</th>
+                <th>Bloom's</th>
+                <th>Type</th>
+                <th>LLM</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="qb-tbody">
+              <tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:2rem;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px;" id="qb-pagination">
+          <span style="font-size:12px; color:#64748b;" id="qb-info"></span>
+          <div style="display:flex; gap:6px;" id="qb-pages"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="section-workspace">
+      <button class="btn btn-ghost btn-sm" onclick="showSection('courses', document.getElementById('nav-courses'))" style="margin-bottom:14px;">&larr; Back to My Courses</button>
+      <div class="page-title" id="ws-title">Course</div>
+      <div class="page-sub" id="ws-sub"></div>
+
+      <div class="ws-tabs">
+        <button class="ws-tab active" id="wstab-tests" onclick="showWsTab('tests')">&#128221; Tests</button>
+        <button class="ws-tab" id="wstab-students" onclick="showWsTab('students')">&#128101; Students</button>
+      </div>
+
+      <div class="ws-pane active" id="wspane-tests">
+
+        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+          <button class="btn btn-gold" onclick="showCreateTest()">+ Create Test</button>
+        </div>
+        <div class="create-form" id="createTestForm">
+          <div style="font-size:14px; font-weight:700; margin-bottom:14px;">Create New Test</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Test Title</label><input class="form-control" id="testTitle" placeholder="e.g. Test 1"></div>
+            <div class="form-group"><label class="form-label">Category</label>
+              <select class="form-control form-select" id="testCategory">
+                <option value="classwork">Classwork</option>
+                <option value="test" selected>Test</option>
+                <option value="exam">Exam</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Time Limit (minutes)</label><input type="number" class="form-control" id="testTime" value="30" min="5" max="180"></div>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:6px;">
+            <button class="btn btn-gold" onclick="createTest()">Create Test</button>
+            <button class="btn btn-ghost" onclick="document.getElementById('createTestForm').classList.remove('show')">Cancel</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:18px;">
+          <div class="card-title">Add Questions to a Test</div>
+          <div class="form-group">
+            <label class="form-label">Which test?</label>
+            <select class="form-control form-select test-select" id="genTest" onchange="onGenTestChange()">
+              <option value="">-- Select a test --</option>
+            </select>
+          </div>
+
+          <div id="genPanel" style="display:none;">
+            <div class="form-group">
+              <label class="form-label">Upload a note for this test</label>
+              <div class="upload-zone" id="tdUploadZone" onclick="document.getElementById('tdFileInput').click()">
+                <div style="font-size:1.6rem;">&#128196;</div>
+                <div style="font-size:13px; color:#64748b; margin-top:6px;">Click to upload PDF, DOCX, TXT, PPTX, XLSX</div>
+              </div>
+              <input type="file" id="tdFileInput" accept=".pdf,.docx,.txt,.pptx,.xlsx" style="display:none">
+              <div class="progress-wrap" id="tdProgress">
+                <div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b;"><span id="tdFileName">Uploading...</span><span id="tdPercent">0%</span></div>
+                <div class="progress-bar-bg"><div class="progress-bar" id="tdBar"></div></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Pick one note to generate from</label>
+              <select class="form-control form-select" id="tdNote"><option value="">-- Select a note --</option></select>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group"><label class="form-label">Bloom's Level</label>
+                <select class="form-control form-select" id="tdBloom">
+                  <option value="remember">Remember</option><option value="understand">Understand</option>
+                  <option value="apply">Apply</option><option value="analyse">Analyse</option>
+                  <option value="evaluate">Evaluate</option><option value="create">Create</option>
+                </select>
+              </div>
+              <div class="form-group"><label class="form-label">Number of Questions (max 50)</label><input type="number" class="form-control" id="tdNum" value="10" min="1" max="50"></div>
+              <div class="form-group"><label class="form-label">Question Type</label>
+                <select class="form-control form-select" id="tdType">
+                  <option value="mcq">Multiple Choice (MCQ)</option>
+                  <option value="fill">Fill in the Blank</option>
+                  <option value="combination">Combination (MCQ + Fill)</option>
+                </select>
+              </div>
+              <div class="form-group"><label class="form-label">AI Model</label>
+                <select class="form-control form-select" id="tdLLM">
+                  <option value="gpt4o">GPT-4o</option><option value="gemini">Gemini 2.5 Flash</option>
+                  <option value="deepseek">DeepSeek V3</option><option value="mock">Mock (Testing)</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-gold" id="tdGenBtn" onclick="generateIntoTest()">&#9889; Generate &amp; Add to Selected Test</button>
+            <div style="font-size:11px; color:#94a3b8; margin-top:8px;">Generate again from another note to stack more into the same test.</div>
+          </div>
+        </div>
+
+        <div class="card" id="genQuestionsCard" style="display:none; margin-bottom:18px;">
+          <div class="card-title">Questions in Selected Test (<span id="td-count">0</span>)</div>
+          <div id="tdQuestions"><div class="empty"><span class="empty-icon">&#10067;</span>No questions yet. Pick a note and generate.</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">All Tests in This Course</div>
+          <div id="testsList"><div class="empty"><span class="empty-icon">&#128221;</span>No tests yet. Create your first test!</div></div>
+        </div>
+      </div>
+
+      <div class="ws-pane" id="wspane-students">
+        <div class="card" style="margin-bottom:18px;">
+          <div class="card-title">Pending Requests (<span id="ws-pending-count">0</span>)</div>
+          <div id="wsPendingList"><div class="empty"><span class="empty-icon">&#9203;</span>No pending requests.</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Enrolled Students</div>
+          <div id="wsStudentsList"><div class="empty"><span class="empty-icon">&#128101;</span>No students enrolled yet.</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let activeCourseId = null;
+  let activeCourseDomain = null;
+  let activeCourseName = '';
+  let currentTestId = null;
+
+  function showSection(name, el) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    if (el) el.classList.add('active');
+    if (name === 'dashboard') loadDashboard();
+    if (name === 'courses') loadCourses();
+    if (name === 'qbank') loadQBank(1);
+  }
+
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  function loadDashboard() {
+    fetch('/lecturer-portal/courses/')
+    .then(r => r.json())
+    .then(data => {
+      const courses = data.courses || [];
+      document.getElementById('stat-courses').textContent = courses.length;
+      let totalStudents = 0;
+      courses.forEach(c => totalStudents += c.enrolled_count);
+      document.getElementById('stat-students').textContent = totalStudents;
+      const container = document.getElementById('dashboard-courses');
+      if (courses.length === 0) { container.innerHTML = '<div class="empty"><span class="empty-icon">&#128218;</span>No courses yet</div>'; return; }
+      container.innerHTML = courses.slice(0, 3).map(c => `
+        <div class="course-card" onclick="openCourse(${c.id}, '${c.domain}', '${(c.code + ' \u2014 ' + c.title).replace(/'/g, "\\'")}')">
+          <div class="course-code">${c.code}</div>
+          <div class="course-name">${c.title}</div>
+          <div class="course-meta">
+            <span class="badge ${c.domain === 'programming' ? 'badge-blue' : 'badge-yellow'}">${c.domain}</span>
+            <span class="meta-text">&#128101; ${c.enrolled_count} students</span>
+          </div>
+        </div>`).join('');
+    });
+  }
+
+  function loadCourses() {
+    fetch('/lecturer-portal/courses/')
+    .then(r => r.json())
+    .then(data => {
+      const courses = data.courses || [];
+      const container = document.getElementById('coursesList');
+      if (courses.length === 0) { container.innerHTML = '<div class="empty"><span class="empty-icon">&#128218;</span>No courses yet. Create your first course!</div>'; return; }
+      container.innerHTML = courses.map(c => `
+        <div class="course-card" id="course-${c.id}" onclick="openCourse(${c.id}, '${c.domain}', '${(c.code + ' \u2014 ' + c.title).replace(/'/g, "\\'")}')">
+          <div class="course-header">
+            <div style="flex:1;">
+              <div class="course-code">${c.code}</div>
+              <div class="course-name">${c.title}</div>
+              <div class="course-meta">
+                <span class="badge ${c.domain === 'programming' ? 'badge-blue' : 'badge-yellow'}">${c.domain}</span>
+                <span class="meta-text">&#128101; ${c.enrolled_count} students</span>
+                <span class="meta-text">&#10067; ${c.question_count} questions</span>
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;" onclick="event.stopPropagation();">
+              <div class="toggle-wrap">
+                <button class="toggle ${c.is_available ? 'on' : 'off'}" onclick="toggleCourse(${c.id}, this)" title="${c.is_available ? 'Click to hide' : 'Click to make available'}"></button>
+                <span class="toggle-label ${c.is_available ? 'on' : 'off'}">${c.is_available ? 'Available' : 'Hidden'}</span>
+              </div>
+              <button class="btn btn-danger btn-sm" onclick="deleteCourse(${c.id})">Delete</button>
+            </div>
+          </div>
+        </div>`).join('');
+    });
+  }
+
+  function toggleCreateForm() { document.getElementById('createForm').classList.toggle('show'); }
+
+  function createCourse() {
+    const code = document.getElementById('courseCode').value.trim();
+    const title = document.getElementById('courseTitle').value.trim();
+    const domain = document.getElementById('courseDomain').value;
+    const desc = document.getElementById('courseDesc').value.trim();
+    if (!code || !title) { alert('Course code and title are required!'); return; }
+    fetch('/lecturer-portal/courses/create', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+      body: JSON.stringify({ code, title, domain, description: desc })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        alert('\u2705 ' + data.message);
+        document.getElementById('createForm').classList.remove('show');
+        document.getElementById('courseCode').value = '';
+        document.getElementById('courseTitle').value = '';
+        document.getElementById('courseDesc').value = '';
+        loadCourses(); loadDashboard();
+      } else alert('\u274C ' + data.message);
+    });
+  }
+
+  function toggleCourse(courseId, btn) {
+    fetch(`/lecturer-portal/courses/toggle/${courseId}`, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token() }}' } })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        btn.className = `toggle ${data.is_available ? 'on' : 'off'}`;
+        const label = btn.nextElementSibling;
+        label.textContent = data.is_available ? 'Available' : 'Hidden';
+        label.className = `toggle-label ${data.is_available ? 'on' : 'off'}`;
+      }
+    });
+  }
+
+  function deleteCourse(courseId) {
+    if (!confirm('Delete this course? This cannot be undone.')) return;
+    fetch(`/lecturer-portal/courses/delete/${courseId}`, { method: 'DELETE', headers: { 'X-CSRFToken': '{{ csrf_token() }}' } })
+    .then(r => r.json())
+    .then(data => { if (data.success) { loadCourses(); loadDashboard(); } else alert('\u274C ' + data.message); });
+  }
+
+  function openCourse(courseId, domain, name) {
+    activeCourseId = courseId;
+    activeCourseDomain = domain;
+    activeCourseName = name;
+    currentTestId = null;
+    showSection('workspace', null);
+    document.getElementById('ws-title').textContent = name;
+    document.getElementById('ws-sub').textContent = domain.charAt(0).toUpperCase() + domain.slice(1);
+    showWsTab('tests');
+    document.getElementById('genPanel').style.display = 'none';
+    document.getElementById('genQuestionsCard').style.display = 'none';
+    document.getElementById('genTest').value = '';
+    loadTests();
+    loadWsStudents();
+  }
+
+  function showWsTab(tab) {
+    document.querySelectorAll('.ws-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.ws-pane').forEach(p => p.classList.remove('active'));
+    document.getElementById('wstab-' + tab).classList.add('active');
+    document.getElementById('wspane-' + tab).classList.add('active');
+  }
+
+  function loadWsStudents() {
+    // Pending requests
+    fetch(`/lecturer-portal/courses/pending/${activeCourseId}`)
+    .then(r => r.json())
+    .then(data => {
+      const pending = data.pending || [];
+      document.getElementById('ws-pending-count').textContent = pending.length;
+      const c = document.getElementById('wsPendingList');
+      if (pending.length === 0) {
+        c.innerHTML = '<div class="empty"><span class="empty-icon">&#9203;</span>No pending requests.</div>';
+      } else {
+        c.innerHTML = `
+          <div class="table-wrap"><table>
+            <thead><tr><th>Name</th><th>Matric No.</th><th>Email</th><th>Requested</th><th>Action</th></tr></thead>
+            <tbody>${pending.map(p => `
+              <tr>
+                <td style="font-weight:600;">${p.name}</td>
+                <td style="font-family:monospace; color:#64748b;">${p.matric_no || 'N/A'}</td>
+                <td style="color:#64748b;">${p.email}</td>
+                <td style="color:#94a3b8;">${p.requested_at}</td>
+                <td><div style="display:flex; gap:6px;">
+                  <button class="btn btn-success btn-sm" onclick="approveStudent(${p.enrollment_id})">Approve</button>
+                  <button class="btn btn-danger btn-sm" onclick="rejectStudent(${p.enrollment_id})">Reject</button>
+                </div></td>
+              </tr>`).join('')}
+            </tbody></table></div>`;
+      }
+    });
+
+    // Enrolled students
+    fetch(`/lecturer-portal/courses/students/${activeCourseId}`)
+    .then(r => r.json())
+    .then(data => {
+      const container = document.getElementById('wsStudentsList');
+      const students = data.students || [];
+      if (students.length === 0) { container.innerHTML = '<div class="empty"><span class="empty-icon">&#128101;</span>No students enrolled yet.</div>'; return; }
+      container.innerHTML = `
+        <div style="font-size:14px; font-weight:700; margin-bottom:14px;">${students.length} students enrolled</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>#</th><th>Name</th><th>Matric No.</th><th>Email</th><th>Enrolled</th></tr></thead>
+          <tbody>${students.map((s, i) => `
+            <tr><td style="color:#94a3b8;">${i+1}</td><td style="font-weight:600;">${s.name}</td>
+            <td style="font-family:monospace; color:#64748b;">${s.matric_no || 'N/A'}</td>
+            <td style="color:#64748b;">${s.email}</td><td style="color:#94a3b8;">${s.enrolled_at}</td></tr>`).join('')}
+          </tbody></table></div>`;
+    });
+  }
+
+  function approveStudent(enrollmentId) {
+    fetch(`/lecturer-portal/courses/approve/${enrollmentId}`, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token() }}' } })
+    .then(r => r.json()).then(data => { if (data.success) loadWsStudents(); });
+  }
+
+  function rejectStudent(enrollmentId) {
+    if (!confirm('Reject this request?')) return;
+    fetch(`/lecturer-portal/courses/reject/${enrollmentId}`, { method: 'DELETE', headers: { 'X-CSRFToken': '{{ csrf_token() }}' } })
+    .then(r => r.json()).then(data => { if (data.success) loadWsStudents(); });
+  }
+  function showCreateTest() { document.getElementById('createTestForm').classList.toggle('show'); }
+
+  function createTest() {
+    const title = document.getElementById('testTitle').value.trim();
+    const category = document.getElementById('testCategory').value;
+    const timeLimit = document.getElementById('testTime').value;
+    if (!title) { alert('Test title is required!'); return; }
+    fetch('/lecturer-portal/tests/create', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+      body: JSON.stringify({ title, course_id: activeCourseId, time_limit: timeLimit, category: category, bloom_level: 'remember' })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById('createTestForm').classList.remove('show');
+        document.getElementById('testTitle').value = '';
+        const newId = data.test_id;
+        loadTestsThenSelect(newId);
+      } else alert('❌ ' + data.message);
+    });
+  }
+
+  function loadTestsThenSelect(testId) {
+    fetch('/lecturer-portal/tests/')
+    .then(r => r.json())
+    .then(data => {
+      const tests = (data.tests || []).filter(t => t.course_id === activeCourseId);
+      const sel = document.getElementById('genTest');
+      sel.innerHTML = '<option value="">-- Select a test --</option>' +
+        tests.map(t => `<option value="${t.id}">${t.title} — ${t.category || 'test'} — ${t.question_count} questions</option>`).join('');
+      // fill the all-tests table too
+      const container = document.getElementById('testsList');
+      if (tests.length === 0) {
+        container.innerHTML = '<div class="empty"><span class="empty-icon">📝</span>No tests yet. Create your first test!</div>';
+      } else {
+        container.innerHTML = `
+          <div class="table-wrap"><table>
+            <thead><tr><th>Title</th><th>Category</th><th>Time</th><th>Questions</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>${tests.map(t => `
+              <tr>
+                <td style="font-weight:600;">${t.title}</td>
+                <td><span class="badge badge-purple">${t.category || 'test'}</span></td>
+                <td>${t.time_limit} mins</td>
+                <td>${t.question_count}</td>
+                <td><span class="badge ${t.is_published ? 'badge-green' : 'badge-yellow'}">${t.is_published ? 'Published' : 'Draft'}</span></td>
+                <td><div style="display:flex; gap:6px;">
+                  <button class="btn btn-sm ${t.is_published ? 'btn-danger' : 'btn-success'}" onclick="toggleTest(${t.id})">${t.is_published ? 'Unpublish' : 'Publish'}</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteTest(${t.id})">Delete</button>
+                </div></td>
+              </tr>`).join('')}
+            </tbody></table></div>`;
+      }
+      // auto-select the new test and open its panel
+      if (testId) {
+        sel.value = String(testId);
+        onGenTestChange();
+        document.getElementById('genPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  }
+
+  function loadTests() {
+    fetch('/lecturer-portal/tests/')
+    .then(r => r.json())
+    .then(data => {
+      const tests = (data.tests || []).filter(t => t.course_id === activeCourseId);
+      const sel = document.getElementById('genTest');
+      const prev = sel.value;
+      sel.innerHTML = '<option value="">-- Select a test --</option>' +
+        tests.map(t => `<option value="${t.id}">${t.title} \u2014 ${t.category || 'test'} \u2014 ${t.question_count} questions</option>`).join('');
+      if (prev) sel.value = prev;
+
+      const container = document.getElementById('testsList');
+      if (tests.length === 0) { container.innerHTML = '<div class="empty"><span class="empty-icon">&#128221;</span>No tests yet. Create your first test!</div>'; return; }
+      container.innerHTML = `
+        <div class="table-wrap"><table>
+          <thead><tr><th>Title</th><th>Category</th><th>Time</th><th>Questions</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>${tests.map(t => `
+            <tr>
+              <td style="font-weight:600;">${t.title}</td>
+              <td><span class="badge badge-purple">${t.category || 'test'}</span></td>
+              <td>${t.time_limit} mins</td>
+              <td>${t.question_count}</td>
+              <td><span class="badge ${t.is_published ? 'badge-green' : 'badge-yellow'}">${t.is_published ? 'Published' : 'Draft'}</span></td>
+              <td><div style="display:flex; gap:6px;">
+                <button class="btn btn-sm ${t.is_published ? 'btn-danger' : 'btn-success'}" onclick="toggleTest(${t.id})">${t.is_published ? 'Unpublish' : 'Publish'}</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteTest(${t.id})">Delete</button>
+              </div></td>
+            </tr>`).join('')}
+          </tbody></table></div>`;
+    });
+  }
+
+  function toggleTest(testId) {
+    fetch(`/lecturer-portal/tests/toggle/${testId}`, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token() }}' } })
+    .then(r => r.json()).then(data => { if (data.success) loadTests(); });
+  }
+
+  function deleteTest(testId) {
+    if (!confirm('Delete this test?')) return;
+    fetch(`/lecturer-portal/tests/delete/${testId}`, { method: 'DELETE', headers: { 'X-CSRFToken': '{{ csrf_token() }}' } })
+    .then(r => r.json()).then(data => { if (data.success) { if (currentTestId == testId) { currentTestId = null; document.getElementById('genPanel').style.display = 'none'; document.getElementById('genQuestionsCard').style.display = 'none'; } loadTests(); } });
+  }
+
+  function onGenTestChange() {
+    const sel = document.getElementById('genTest');
+    currentTestId = sel.value;
+    const panel = document.getElementById('genPanel');
+    const qcard = document.getElementById('genQuestionsCard');
+    if (currentTestId) {
+      panel.style.display = 'block';
+      qcard.style.display = 'block';
+      loadTestNotes();
+      loadTestQuestions();
+    } else {
+      panel.style.display = 'none';
+      qcard.style.display = 'none';
+    }
+  }
+
+  const tdInput = document.getElementById('tdFileInput');
+  if (tdInput) {
+    tdInput.addEventListener('change', () => { if (tdInput.files.length > 0) uploadNoteToTest(tdInput.files[0]); });
+  }
+
+  function uploadNoteToTest(file) {
+    if (!currentTestId) { alert('Select a test first!'); return; }
+    const fd = new FormData();
+    fd.append('file', file);
+    if (activeCourseId) fd.append('course_id', activeCourseId);
+    fd.append('test_id', currentTestId);
+    const prog = document.getElementById('tdProgress');
+    const bar = document.getElementById('tdBar');
+    document.getElementById('tdFileName').textContent = file.name;
+    prog.style.display = 'block';
+    let p = 0;
+    const iv = setInterval(() => { p += 10; bar.style.width = p + '%'; document.getElementById('tdPercent').textContent = p + '%'; if (p >= 90) clearInterval(iv); }, 100);
+    fetch('/lecturer-portal/upload', { method: 'POST', body: fd, headers: { 'X-CSRFToken': '{{ csrf_token() }}' }, credentials: 'same-origin' })
+    .then(r => r.json())
+    .then(data => {
+      clearInterval(iv); bar.style.width = '100%'; document.getElementById('tdPercent').textContent = '100%';
+      setTimeout(() => { prog.style.display = 'none'; bar.style.width = '0%'; }, 800);
+      if (data.success) loadTestNotes(); else alert(data.message);
+    })
+    .catch(() => { prog.style.display = 'none'; alert('Upload failed.'); });
+  }
+
+  function loadTestNotes() {
+    fetch(`/lecturer-portal/tests/${currentTestId}/uploads`)
+      .then(r => r.json())
+      .then(data => {
+        const sel = document.getElementById('tdNote');
+        sel.innerHTML = '<option value="">-- Select a note --</option>' +
+          (data.uploads || []).map(u => `<option value="${u.id}">${u.filename} (${u.file_type.toUpperCase()})</option>`).join('');
+      });
+  }
+
+  function generateIntoTest() {
+    if (!currentTestId) { alert('Select a test first!'); return; }
+    const noteId = document.getElementById('tdNote').value;
+    if (!noteId) { alert('Select a note to generate from!'); return; }
+    const btn = document.getElementById('tdGenBtn');
+    btn.disabled = true; btn.textContent = '\u23F3 Generating...';
+    fetch(`/lecturer-portal/tests/${currentTestId}/generate`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+      body: JSON.stringify({
+        upload_id: noteId,
+        bloom_level: document.getElementById('tdBloom').value,
+        num_questions: document.getElementById('tdNum').value,
+        question_type: document.getElementById('tdType').value,
+        llm: document.getElementById('tdLLM').value
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      btn.disabled = false; btn.textContent = '\u26A1 Generate & Add to Selected Test';
+      if (data.success) { alert('\u2705 ' + data.message); loadTestQuestions(); loadTests(); }
+      else alert('\u274C ' + data.message);
+    })
+    .catch(() => { btn.disabled = false; btn.textContent = '\u26A1 Generate & Add to Selected Test'; alert('Generation failed.'); });
+  }
+
+  function loadTestQuestions() {
+    fetch(`/lecturer-portal/tests/${currentTestId}/questions`)
+      .then(r => r.json())
+      .then(data => {
+        const qs = data.questions || [];
+        document.getElementById('td-count').textContent = qs.length;
+        const c = document.getElementById('tdQuestions');
+        if (qs.length === 0) { c.innerHTML = '<div class="empty"><span class="empty-icon">&#10067;</span>No questions yet. Pick a note and generate.</div>'; return; }
+        c.innerHTML = qs.map((q, i) => {
+          let body = '';
+          if (q.type === 'mcq') {
+            body = '<div class="q-options">' + Object.entries(q.options).map(([k, v]) =>
+              `<div class="q-opt ${k === q.answer ? 'correct' : ''}">${k}. ${v || ''}${k === q.answer ? ' \u2713' : ''}</div>`).join('') + '</div>';
+          } else {
+            body = `<div class="q-opt correct" style="display:inline-block;">Answer: ${q.answer}</div>`;
+          }
+          return `
+            <div class="q-card">
+              <div class="q-header">
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                  <span class="badge badge-purple">${q.bloom_level}</span>
+                  <span class="badge badge-blue">${q.type.toUpperCase()}</span>
+                  <span class="badge ${q.verification_status === 'verified' ? 'badge-green' : q.verification_status === 'failed' ? 'badge-red' : 'badge-yellow'}">${q.verification_status === 'verified' ? '✅ Verified' : q.verification_status === 'failed' ? '❌ Failed' : '⚠️ Warning'}</span>
+                ${q.verification_status !== 'verified' && q.verification_message ? `<div style="font-size:11px; color:#64748b; margin-top:4px; padding:4px 8px; background:#f8fafc; border-radius:6px; border-left:3px solid ${q.verification_status === 'failed' ? '#dc2626' : '#f59e0b'};">💬 ${q.verification_message}</div>` : ''}
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="removeQuestion(${q.id})">Remove</button>
+              </div>
+              <div class="q-text">Q${i+1}. ${q.question_text}</div>
+              ${body}
+            </div>`;
+        }).join('');
+      });
+  }
+
+  function removeQuestion(qid) {
+    if (!confirm('Remove this question from the test?')) return;
+    fetch(`/lecturer-portal/tests/question/${qid}/remove`, { method: 'DELETE', headers: { 'X-CSRFToken': '{{ csrf_token() }}' } })
+    .then(r => r.json()).then(data => { if (data.success) { loadTestQuestions(); loadTests(); } });
+  }
+
+  function loadQBank(page = 1) {
+    const domain = document.getElementById('qb-domain').value;
+    const bloom = document.getElementById('qb-bloom').value;
+    const type = document.getElementById('qb-type').value;
+    const status = document.getElementById('qb-status').value;
+
+    const params = new URLSearchParams({ page, domain, bloom, type, status });
+
+    fetch(`/lecturer-portal/courses/question-bank?${params}`)
+    .then(r => r.json())
+    .then(data => {
+      // Update stats
+      document.getElementById('qb-total').textContent = data.stats.total;
+      document.getElementById('qb-verified').textContent = data.stats.verified;
+      document.getElementById('qb-warning').textContent = data.stats.warning;
+      document.getElementById('qb-failed').textContent = data.stats.failed;
+
+      // Update table
+      const tbody = document.getElementById('qb-tbody');
+      if (data.questions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:2rem;">No questions found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.questions.map(q => `
+        <tr>
+          <td style="font-size:13px;">${q.question_text.length > 80 ? q.question_text.substring(0,80)+'...' : q.question_text}</td>
+          <td style="font-family:monospace; font-size:12px; color:#64748b;">${q.course_code}</td>
+          <td><span class="badge ${q.domain === 'mathematics' ? 'badge-yellow' : 'badge-blue'}">${q.domain}</span></td>
+          <td><span class="badge badge-purple">${q.bloom_level}</span></td>
+          <td><span class="badge badge-blue">${q.question_type.toUpperCase()}</span></td>
+          <td style="font-size:11px; color:#64748b;">${q.llm_used}</td>
+          <td><span class="badge ${q.verification_status === 'verified' ? 'badge-green' : q.verification_status === 'failed' ? 'badge-red' : 'badge-yellow'}">
+            ${q.verification_status === 'verified' ? '✅ Verified' : q.verification_status === 'failed' ? '❌ Failed' : '⚠️ Warning'}
+          </span></td>
+        </tr>`).join('');
+
+      // Pagination
+      document.getElementById('qb-info').textContent =
+        `Showing ${((page-1)*data.per_page)+1}–${Math.min(page*data.per_page, data.total)} of ${data.total} questions`;
+
+      const pages = document.getElementById('qb-pages');
+      pages.innerHTML = '';
+      for (let i = 1; i <= data.total_pages; i++) {
+        const btn = document.createElement('button');
+        btn.className = `btn btn-sm ${i === page ? 'btn-primary' : 'btn-ghost'}`;
+        btn.textContent = i;
+        btn.onclick = () => loadQBank(i);
+        pages.appendChild(btn);
+      }
+    });
+  }
+
+  loadDashboard();
+</script>
+{% endblock %}

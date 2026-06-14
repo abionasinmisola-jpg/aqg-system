@@ -1,0 +1,251 @@
+{% extends "shared/base.html" %}
+{% block title %}Student Login — AQG CBT Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+  body { background: #f0f4f8; }
+  .login-wrap {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* ── Left Panel ── */
+  .left-panel {
+    background: #0d1f3c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .left-panel::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 60% 30%, rgba(232,160,32,.12) 0%, transparent 60%);
+  }
+  .brand-logo {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, #e8a020, #f5c842);
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    box-shadow: 0 0 40px rgba(232,160,32,.3);
+  }
+  .brand-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem; font-weight: 900;
+    color: #fff; position: relative;
+    margin-bottom: .5rem;
+  }
+  .brand-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,.4);
+    text-align: center;
+    max-width: 280px;
+    line-height: 1.6;
+    position: relative;
+    margin-bottom: 2.5rem;
+  }
+  .feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    position: relative;
+    width: 100%;
+    max-width: 280px;
+  }
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    font-size: 13px;
+    color: rgba(255,255,255,.5);
+  }
+  .feature-item span {
+    width: 28px; height: 28px;
+    background: rgba(232,160,32,.12);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .9rem; flex-shrink: 0;
+  }
+
+  /* ── Right Panel ── */
+  .right-panel {
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+  }
+  .form-card {
+    width: 100%;
+    max-width: 400px;
+  }
+  .form-card h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.7rem; font-weight: 800;
+    color: #0d1f3c; margin-bottom: .3rem;
+  }
+  .form-card .sub {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 2rem;
+  }
+  .form-label {
+    font-size: 12px; font-weight: 600;
+    color: #64748b; margin-bottom: .4rem;
+    display: block;
+  }
+  .form-control {
+    width: 100%;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    color: #1e293b;
+    border-radius: 10px;
+    padding: .7rem 1rem;
+    font-size: 14px;
+    transition: border-color .2s;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+  .form-control:focus {
+    outline: none;
+    border-color: #0d1f3c;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(13,31,60,.08);
+  }
+  .form-control::placeholder { color: #94a3b8; }
+  .btn-login {
+    width: 100%;
+    background: #0d1f3c;
+    color: #fff; border: none;
+    border-radius: 10px; padding: .8rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 15px;
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+    margin-top: .5rem;
+  }
+  .btn-login:hover { background: #1a3563; transform: translateY(-1px); }
+  .field-error { color: #dc2626; font-size: 12px; margin-top: .3rem; }
+  .divider {
+    text-align: center; color: #94a3b8;
+    font-size: 13px; margin: 1.2rem 0;
+    position: relative;
+  }
+  .divider::before, .divider::after {
+    content: ''; position: absolute;
+    top: 50%; width: 42%; height: 1px;
+    background: #e2e8f0;
+  }
+  .divider::before { left: 0; }
+  .divider::after { right: 0; }
+  .register-link {
+    text-align: center;
+    font-size: 13px; color: #64748b;
+  }
+  .register-link a {
+    color: #0d1f3c; font-weight: 700;
+    text-decoration: none;
+  }
+  .register-link a:hover { color: #e8a020; }
+  .form-check-input:checked {
+    background-color: #0d1f3c;
+    border-color: #0d1f3c;
+  }
+
+  @media (max-width: 768px) {
+    .login-wrap { grid-template-columns: 1fr; }
+    .left-panel { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-wrap">
+  <!-- Left Panel -->
+  <div class="left-panel">
+    <div class="brand-logo">🎓</div>
+    <div class="brand-name">CBT Portal</div>
+    <p class="brand-sub">Your online examination platform for computer-based testing</p>
+    <div class="feature-list">
+      <div class="feature-item">
+        <span>📚</span> Browse and enroll in courses
+      </div>
+      <div class="feature-item">
+        <span>📝</span> Take timed MCQ tests online
+      </div>
+      <div class="feature-item">
+        <span>📊</span> View your scores and results instantly
+      </div>
+      <div class="feature-item">
+        <span>🔒</span> Secure and monitored assessments
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right-panel">
+    <div class="form-card">
+      <h2>Student Login</h2>
+      <p class="sub">Sign in to access your courses and tests</p>
+
+      <form method="POST" action="{{ url_for('auth.student_login') }}" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+          <label class="form-label">Email Address</label>
+          {{ form.email(class="form-control", placeholder="your@email.com") }}
+          {% for err in form.email.errors %}
+            <div class="field-error">{{ err }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <div style="position:relative;">
+            {{ form.password(class="form-control", placeholder="••••••••", id="pwd") }}
+            <button type="button" onclick="togglePwd()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;">
+              <i class="bi bi-eye" id="eyeIcon"></i>
+            </button>
+          </div>
+          {% for err in form.password.errors %}
+            <div class="field-error">{{ err }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="mb-3 d-flex align-items-center gap-2">
+          {{ form.remember(class="form-check-input") }}
+          <label class="form-label mb-0" style="font-size:13px; color:#64748b;">Remember me</label>
+        </div>
+
+        <button type="submit" class="btn-login">
+          Sign In →
+        </button>
+      </form>
+
+      <div class="divider">or</div>
+
+      <div class="register-link">
+        New student? <a href="{{ url_for('auth.register') }}">Create an account</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function togglePwd() {
+    const f = document.getElementById('pwd');
+    const i = document.getElementById('eyeIcon');
+    if (f.type === 'password') { f.type = 'text'; i.className = 'bi bi-eye-slash'; }
+    else { f.type = 'password'; i.className = 'bi bi-eye'; }
+  }
+</script>
+{% endblock %}

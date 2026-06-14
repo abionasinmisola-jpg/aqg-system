@@ -1,0 +1,20 @@
+{
+  "mathematics": {
+    "retrieval_time_ms": 45.9,
+    "generation_time_ms": 11418.78,
+    "moderation_time_ms": 18300.88,
+    "total_time_ms": 29765.56
+  },
+  "programming": {
+    "retrieval_time_ms": 90.53,
+    "generation_time_ms": 5403.18,
+    "moderation_time_ms": 1.33,
+    "total_time_ms": 5495.04
+  },
+  "averages": {
+    "retrieval_time_ms": 68.22,
+    "generation_time_ms": 8410.98,
+    "moderation_time_ms": 9151.11,
+    "total_time_ms": 17630.3
+  }
+}

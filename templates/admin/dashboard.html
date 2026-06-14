@@ -1,0 +1,232 @@
+{% extends "shared/base.html" %}
+{% block title %}Admin Dashboard — AQG System{% endblock %}
+
+{% block extra_css %}
+<style>
+  .admin-wrap {
+    min-height: 100vh;
+    background: var(--bg);
+    padding: 2rem;
+  }
+  .admin-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+  }
+  .admin-title { font-size: 1.8rem; font-weight: 800; }
+  .admin-title span { color: var(--accent2); }
+  .btn-logout {
+    background: rgba(242,107,107,.1);
+    border: 1px solid rgba(242,107,107,.2);
+    color: var(--danger); border-radius: 10px;
+    padding: .5rem 1.2rem; font-size: 14px;
+    text-decoration: none; transition: all .2s;
+    display: inline-flex; align-items: center; gap: .5rem;
+  }
+  .btn-logout:hover { background: rgba(242,107,107,.2); color: var(--danger); }
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .stat-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+  }
+  .stat-icon.purple { background: rgba(167,139,250,.15); }
+  .stat-icon.blue   { background: rgba(79,142,247,.15); }
+  .stat-icon.green  { background: rgba(77,217,142,.15); }
+  .stat-label { font-size: 13px; color: var(--muted); margin-bottom: .2rem; }
+  .stat-value { font-size: 1.8rem; font-weight: 800; font-family: 'Syne', sans-serif; }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem;
+  }
+  .section-title { font-size: 1.1rem; font-weight: 700; }
+  .btn-add {
+    background: linear-gradient(135deg, var(--accent2), #7c3aed);
+    color: #fff; border: none; border-radius: 10px;
+    padding: .5rem 1.2rem; font-size: 14px; font-weight: 600;
+    text-decoration: none; transition: opacity .2s;
+    display: inline-flex; align-items: center; gap: .5rem;
+  }
+  .btn-add:hover { opacity: .9; color: #fff; }
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    background: var(--surface2);
+    padding: .75rem 1rem; font-size: 12px;
+    font-weight: 600; color: var(--muted);
+    text-align: left; text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  td {
+    padding: .85rem 1rem; font-size: 14px;
+    border-top: 1px solid var(--border);
+  }
+  tr:hover td { background: rgba(255,255,255,.02); }
+  .badge-role {
+    display: inline-block; padding: .25rem .7rem;
+    border-radius: 50px; font-size: 11px; font-weight: 600;
+  }
+  .badge-lecturer { background: rgba(79,142,247,.15); color: var(--accent); }
+  .badge-student  { background: rgba(77,217,142,.15); color: var(--success); }
+  .btn-delete {
+    background: rgba(242,107,107,.1);
+    border: 1px solid rgba(242,107,107,.2);
+    color: var(--danger); border-radius: 8px;
+    padding: .3rem .8rem; font-size: 12px;
+    text-decoration: none; transition: all .2s;
+  }
+  .btn-delete:hover { background: rgba(242,107,107,.2); color: var(--danger); }
+  .empty-state {
+    text-align: center; padding: 2rem;
+    color: var(--muted); font-size: 14px;
+  }
+  .must-change {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-size: 11px; color: var(--gold);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-wrap">
+
+  <!-- Header -->
+  <div class="admin-header">
+    <div>
+      <div class="admin-title">Admin <span>Dashboard</span></div>
+      <div style="color:var(--muted); font-size:14px;">Welcome back, {{ user.full_name }}</div>
+    </div>
+    <a href="{{ url_for('admin.logout') }}" class="btn-logout">
+      <i class="bi bi-box-arrow-right"></i> Logout
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon purple">⚙️</div>
+      <div>
+        <div class="stat-label">System Role</div>
+        <div class="stat-value" style="font-size:1.2rem;">Super Admin</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">🏫</div>
+      <div>
+        <div class="stat-label">Total Lecturers</div>
+        <div class="stat-value">{{ lecturers|length }}</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">🎓</div>
+      <div>
+        <div class="stat-label">Total Students</div>
+        <div class="stat-value">{{ students|length }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lecturers Table -->
+  <div class="section-header">
+    <div class="section-title">👨‍🏫 Lecturer Accounts</div>
+    <a href="{{ url_for('admin.create_lecturer') }}" class="btn-add">
+      <i class="bi bi-plus-lg"></i> Add Lecturer
+    </a>
+  </div>
+
+  <div class="table-card">
+    {% if lecturers %}
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lecturer in lecturers %}
+        <tr>
+          <td style="color:var(--muted);">{{ loop.index }}</td>
+          <td>{{ lecturer.full_name }}</td>
+          <td>{{ lecturer.email }}</td>
+          <td>
+            {% if lecturer.must_change_password %}
+              <span class="must-change"><i class="bi bi-clock"></i> Awaiting first login</span>
+            {% else %}
+              <span style="color:var(--success); font-size:12px;"><i class="bi bi-check-circle"></i> Active</span>
+            {% endif %}
+          </td>
+          <td style="color:var(--muted);">{{ lecturer.created_at.strftime('%d %b %Y') }}</td>
+          <td>
+            <a href="{{ url_for('admin.delete_lecturer', id=lecturer.id) }}"
+               class="btn-delete"
+               onclick="return confirm('Delete {{ lecturer.full_name }}?')">
+              <i class="bi bi-trash"></i> Delete
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <div class="empty-state">
+        <i class="bi bi-person-x" style="font-size:2rem; display:block; margin-bottom:.5rem;"></i>
+        No lecturer accounts yet. Click "Add Lecturer" to create one.
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Students Table -->
+  <div class="section-header">
+    <div class="section-title">🎓 Registered Students</div>
+  </div>
+
+  <div class="table-card">
+    {% if students %}
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Joined</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+        <tr>
+          <td style="color:var(--muted);">{{ loop.index }}</td>
+          <td>{{ student.full_name }}</td>
+          <td>{{ student.email }}</td>
+          <td style="color:var(--muted);">{{ student.created_at.strftime('%d %b %Y') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <div class="empty-state">
+        <i class="bi bi-mortarboard" style="font-size:2rem; display:block; margin-bottom:.5rem;"></i>
+        No students registered yet.
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

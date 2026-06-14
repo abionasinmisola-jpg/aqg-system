@@ -1,0 +1,90 @@
+{
+  "Mathematics": {
+    "gpt4o": {
+      "llm_name": "GPT-4o",
+      "question_count": 30,
+      "rouge1": 0.3235,
+      "rouge2": 0.1316,
+      "rougeL": 0.2451,
+      "bleu": 0.0962,
+      "verified": 30,
+      "warning": 0,
+      "failed": 0,
+      "pass_rate": 100.0,
+      "bloom_aligned": 24,
+      "bloom_accuracy": 80.0
+    },
+    "gemini": {
+      "llm_name": "Gemini 2.0 Flash",
+      "question_count": 30,
+      "rouge1": 0.3097,
+      "rouge2": 0.1086,
+      "rougeL": 0.2407,
+      "bleu": 0.103,
+      "verified": 17,
+      "warning": 0,
+      "failed": 13,
+      "pass_rate": 56.7,
+      "bloom_aligned": 29,
+      "bloom_accuracy": 96.7
+    },
+    "deepseek": {
+      "llm_name": "DeepSeek V3",
+      "question_count": 30,
+      "rouge1": 0.2725,
+      "rouge2": 0.1227,
+      "rougeL": 0.222,
+      "bleu": 0.1252,
+      "verified": 10,
+      "warning": 0,
+      "failed": 20,
+      "pass_rate": 33.3,
+      "bloom_aligned": 24,
+      "bloom_accuracy": 80.0
+    }
+  },
+  "Programming": {
+    "gpt4o": {
+      "llm_name": "GPT-4o",
+      "question_count": 30,
+      "rouge1": 0.3359,
+      "rouge2": 0.0879,
+      "rougeL": 0.2825,
+      "bleu": 0.0657,
+      "verified": 30,
+      "warning": 0,
+      "failed": 0,
+      "pass_rate": 100.0,
+      "bloom_aligned": 30,
+      "bloom_accuracy": 100.0
+    },
+    "gemini": {
+      "llm_name": "Gemini 2.0 Flash",
+      "question_count": 30,
+      "rouge1": 0.2814,
+      "rouge2": 0.0561,
+      "rougeL": 0.2321,
+      "bleu": 0.0498,
+      "verified": 26,
+      "warning": 0,
+      "failed": 4,
+      "pass_rate": 86.7,
+      "bloom_aligned": 29,
+      "bloom_accuracy": 96.7
+    },
+    "deepseek": {
+      "llm_name": "DeepSeek V3",
+      "question_count": 30,
+      "rouge1": 0.3855,
+      "rouge2": 0.18,
+      "rougeL": 0.3401,
+      "bleu": 0.1242,
+      "verified": 30,
+      "warning": 0,
+      "failed": 0,
+      "pass_rate": 100.0,
+      "bloom_aligned": 30,
+      "bloom_accuracy": 100.0
+    }
+  }
+}

@@ -1,0 +1,170 @@
+{% extends "shared/base.html" %}
+{% block title %}Welcome — AQG System{% endblock %}
+
+{% block extra_css %}
+<style>
+  .landing-wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: radial-gradient(ellipse at 30% 20%, rgba(79,142,247,.1) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(167,139,250,.08) 0%, transparent 50%);
+  }
+  .landing-badge {
+    background: rgba(79,142,247,.1);
+    border: 1px solid rgba(79,142,247,.3);
+    color: var(--accent);
+    border-radius: 50px;
+    padding: .4rem 1.2rem;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+  }
+  .landing-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    text-align: center;
+    line-height: 1.1;
+    margin-bottom: 1.2rem;
+  }
+  .landing-title span {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .landing-sub {
+    color: var(--muted);
+    text-align: center;
+    max-width: 520px;
+    line-height: 1.7;
+    font-size: 16px;
+    margin-bottom: 2.5rem;
+  }
+  .landing-btns {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 3rem;
+  }
+  .btn-main {
+    background: linear-gradient(135deg, var(--accent), #6fa3ff);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: .85rem 2rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    transition: opacity .2s, transform .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .btn-main:hover { opacity: .9; transform: translateY(-2px); color: #fff; }
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: .85rem 2rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    transition: border-color .2s, transform .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    max-width: 800px;
+    width: 100%;
+  }
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    text-align: center;
+    transition: border-color .2s;
+  }
+  .feature-card:hover { border-color: rgba(79,142,247,.3); }
+  .feature-icon {
+    font-size: 1.8rem;
+    margin-bottom: .6rem;
+    display: block;
+  }
+  .feature-card h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: .3rem;
+  }
+  .feature-card p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="landing-wrap">
+
+  <div class="landing-badge">
+    <i class="bi bi-stars me-1"></i> AI-Powered Question Generation
+  </div>
+
+  <h1 class="landing-title">
+    Generate Exam Questions<br><span>Automatically with AI</span>
+  </h1>
+
+  <p class="landing-sub">
+    Upload your lecture notes and let the AQG System generate high-quality,
+    Bloom's Taxonomy aligned MCQs in seconds — powered by GPT-4o, Gemini & DeepSeek.
+  </p>
+
+  <div class="landing-btns">
+    <a href="{{ url_for('auth.register') }}" class="btn-main">
+      <i class="bi bi-person-plus"></i> Create Account
+    </a>
+    <a href="{{ url_for('auth.student_login') }}" class="btn-outline">
+      <i class="bi bi-box-arrow-in-right"></i> Sign In
+    </a>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">🧠</span>
+      <h4>3 AI Models</h4>
+      <p>GPT-4o, Gemini 1.5 Flash and DeepSeek V3 working together</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📚</span>
+      <h4>Bloom's Taxonomy</h4>
+      <p>Questions aligned to all 6 cognitive levels automatically</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔍</span>
+      <h4>RAG Pipeline</h4>
+      <p>Questions grounded in your actual lecture materials</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔒</span>
+      <h4>Secure Access</h4>
+      <p>Separate secured portals for lecturers and students</p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

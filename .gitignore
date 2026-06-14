@@ -1,0 +1,22 @@
+﻿# Environment variables
+.env
+
+# Database
+instance/
+*.db
+
+# FAISS / BM25 indexes
+static/indexes/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Uploads
+uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
