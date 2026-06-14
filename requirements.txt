@@ -40,3 +40,4 @@ nltk==3.9.4
 # Used by evaluation scripts (datasets for AQuA-RAT / SciQ)
 datasets==5.0.0
 pandas==2.3.2
+gunicorn==23.0.0
