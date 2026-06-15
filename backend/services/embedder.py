@@ -11,8 +11,7 @@ from rank_bm25 import BM25Okapi
 
 
 # Load the embedding model once
-model = SentenceTransformer('all-MiniLM-L6-v2')
-
+model = SentenceTransformer('local_model/all-MiniLM-L6-v2')
 
 def embed_chunks(chunks: list) -> np.ndarray:
     """Convert text chunks to vectors"""
