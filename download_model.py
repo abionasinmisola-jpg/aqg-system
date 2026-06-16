@@ -3,9 +3,10 @@ import requests
 
 MODEL_DIR = "local_model/all-MiniLM-L6-v2"
 MODEL_FILE = os.path.join(MODEL_DIR, "model.safetensors")
-MODEL_URL = https://github.com/abionasinmisola-jpg/aqg-system/releases/download/v1.0/model.safetensors
+MODEL_URL = "https://github.com/abionasinmisola-jpg/aqg-system/releases/download/v1.0/model.safetensors"
 
 os.makedirs(MODEL_DIR, exist_ok=True)
+
 
 if not os.path.exists(MODEL_FILE) or os.path.getsize(MODEL_FILE) < 1000:
     print("Downloading model.safetensors...")
