@@ -9,7 +9,11 @@ from backend.routes.lecturer import lecturer_required
 course_bp = Blueprint("course", __name__, url_prefix="/lecturer-portal/courses")
 
 
+@course_bp.route("/", methods=["GET"])
+@login_required
+@lecturer_required
 def my_courses():
+    from backend.models.question import Question
     from backend.models.question import Question
     from backend.models.test import Test
 
