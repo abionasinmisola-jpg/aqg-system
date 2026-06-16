@@ -407,7 +407,8 @@
       let totalStudents = 0;
       courses.forEach(c => totalStudents += c.enrolled_count);
       document.getElementById('stat-students').textContent = totalStudents;
-      const container = document.getElementById('dashboard-courses');
+      document.getElementById('stat-questions').textContent = data.questions_generated || 0;
+      document.getElementById('stat-tests').textContent = data.published_tests || 0;
       if (courses.length === 0) { container.innerHTML = '<div class="empty"><span class="empty-icon">&#128218;</span>No courses yet</div>'; return; }
       container.innerHTML = courses.slice(0, 3).map(c => `
         <div class="course-card" onclick="openCourse(${c.id}, '${c.domain}', '${(c.code + ' \u2014 ' + c.title).replace(/'/g, "\\'")}')">

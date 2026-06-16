@@ -9,11 +9,14 @@ from backend.routes.lecturer import lecturer_required
 course_bp = Blueprint("course", __name__, url_prefix="/lecturer-portal/courses")
 
 
-@course_bp.route("/", methods=["GET"])
-@login_required
-@lecturer_required
 def my_courses():
+    from backend.models.question import Question
+    from backend.models.test import Test
+
     courses = Course.query.filter_by(lecturer_id=current_user.id).all()
+    questions_generated = Question.query.filter_by(lecturer_id=current_user.id).count()
+    published_tests = Test.query.filter_by(lecturer_id=current_user.id, is_published=True).count()
+
     return jsonify({
         "courses": [{
             "id": c.id,
@@ -23,7 +26,9 @@ def my_courses():
             "is_available": c.is_available,
             "enrolled_count": c.enrolled_count(),
             "question_count": len(c.questions)
-        } for c in courses]
+        } for c in courses],
+        "questions_generated": questions_generated,
+        "published_tests": published_tests
     })
 
 
