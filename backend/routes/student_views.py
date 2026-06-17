@@ -104,11 +104,11 @@ def enroll(course_id):
             "success": False,
             "message": "You are already enrolled in this course"
         }), 400
-
+    
     enrollment = Enrollment(
         student_id=current_user.id,
         course_id=course_id,
-        status="pending"
+        status="enrolled"  # TEMP: auto-approve for usability testing — revert to "pending" afterward
     )
     db.session.add(enrollment)
     db.session.commit()
